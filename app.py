@@ -22,19 +22,19 @@ with st.sidebar:
             "Raw Data",
             "Student Result",
             "Topper",
-            # "Search Student",
-            # "Subject Analysis",
-            # "Pass / Fail",
-            # "Pivot Table"
+            "Search Student",
+            "Subject Analysis",
+            "Pass / Fail",
+            "Pivot Table"
         ],
         icons=[
             "table",
             "bar-chart",
             "trophy",
-            # "search",
-            # "book",
-            # "check-circle",
-            # "grid"
+            "search",
+            "book",
+            "check-circle",
+            "grid"
         ],
         menu_icon="menu-button-wide",
         default_index=0
@@ -54,9 +54,39 @@ elif selected=="Student Result":
     st.dataframe({"Total":total,"Average":avg})
     
 elif selected=="Topper":
+    
     st.subheader("Topper in Class")
     topper=df.groupby("Name")["Marks"].sum().sort_values(ascending=False)
-    st.dataframe(topper.head(1))
+    
+    n=st.number_input("How many topper you want to show",min_value=1,max_value=len(topper))
+    st.dataframe(topper.head(n))
+    
+elif selected=="Search Student":
+    st.subheader("Search Student")
+    filter_txt=st.text_input("Enter student name to search")
+    filtered_data=df[df["Name"].str.lower()==filter_txt.lower()]
+    if not filtered_data.empty:
+        st.dataframe(filtered_data)
+        total=filtered_data["Marks"].sum()
+        avg=filtered_data["Marks"].mean()
+        st.write(f"Total marks of {filter_txt}={total}")
+        st.write(f"Average marks of {filter_txt}={avg}")
+elif selected=="Subject Analysis":
+    avg=df.groupby("Subject")["Marks"].mean()
+    st.dataframe(avg)
+    
+elif selected=="Pass / Fail":
+    m=st.slider("Please select min marks",min_value=0,max_value=100,value=40)
+    df["Result"]=df["Marks"].apply(
+        lambda x: "Pass" if x>=m else "Fail"
+    )
+    st.dataframe(df)
+    st.subheader("Summary of student")
+    st.write(df["Result"].value_counts())
+elif selected=="Pivot Table":
+    pivot=df.pivot_table(values="Marks",index="Subject",columns="Name")
+    st.dataframe(pivot)
+        
 
 
     
